@@ -1,10 +1,8 @@
-const fs = require("fs/promises");
-const path = require("path");
-const { nanoid } = require("nanoid");
+import fs from "fs/promises";
+import path from "path";
+import { nanoid } from "nanoid";
 
-const contactsPath = path.join(__dirname, "./db/contacts.json");
-
-// console.log(contactsPath);
+const contactsPath = path.join(process.cwd(), "./db/contacts.json");
 
 async function listContacts() {
   // Повертає масив контактів.
@@ -26,7 +24,7 @@ async function removeContact(contactId) {
   const contactsList = await listContacts();
 
   const contactIndex = contactsList.findIndex(
-    (contact) => contact.id === contactId,
+    (contact) => contact.id === contactId
   );
 
   if (contactIndex === -1) {
@@ -35,22 +33,13 @@ async function removeContact(contactId) {
 
   const [result] = contactsList.splice(contactIndex, 1);
   fs.writeFile(contactsPath, JSON.stringify(contactsList, null, 2));
-  console.log("Contact was successfully removed");
   return result;
 }
 
-async function addContact(name, email, phone) {
+async function addContact({ name, email, phone }) {
   // Повертає об'єкт доданого контакту (з id).
 
   const contactsList = await listContacts();
-
-  // if (
-  //   contactsList.findIndex((contact) => contact.email === email) !== -1 ||
-  //   contactsList.findIndex((contact) => contact.phone === phone) !== -1
-  // ) {
-  //   console.log("such contact already exists in the base");
-  //   return null;
-  // }
 
   const newContact = {
     name,
@@ -64,9 +53,26 @@ async function addContact(name, email, phone) {
   return newContact;
 }
 
-module.exports = {
+async function updateContact(id, data) {
+  const contactsList = await listContacts();
+  // const contact = contactsList.find((item) => item.id === id);
+
+  const contactIndex = contactsList.findIndex((contact) => contact.id === id);
+  if (contactIndex === -1) {
+    return null;
+  }
+
+  contactsList[contactIndex] = { ...contactsList[contactIndex], ...data };
+
+  fs.writeFile(contactsPath, JSON.stringify(contactsList, null, 2));
+
+  return contactsList[contactIndex];
+}
+
+export default {
   listContacts,
   getContactById,
   removeContact,
   addContact,
+  updateContact,
 };
