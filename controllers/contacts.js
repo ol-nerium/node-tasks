@@ -1,15 +1,21 @@
-import { ContactCollection } from '../models/contacts.js'
+import {
+    createContact,
+    deleteContact,
+    getAllContacts,
+    getContactById,
+    updateContact,
+} from '../services/contacts.js'
 import { ctrlWrapper } from '../utils/ctrlWraper.js'
 import { httpError } from '../utils/httpError.js'
 
-const getAllContacts = async (req, res) => {
-    const contacts = await ContactCollection.find()
+const getAllContactsCtrl = async (req, res) => {
+    const contacts = await getAllContacts()
     res.status(200).json(contacts)
 }
 
-const getContactById = async (req, res) => {
+const getContactByIdCtrl = async (req, res) => {
     const { contactId } = req.params
-    const contact = await ContactCollection.findById(contactId)
+    const contact = await getContactById(contactId)
 
     if (!contact) {
         throw httpError(404, 'Not found')
@@ -18,8 +24,8 @@ const getContactById = async (req, res) => {
     res.status(200).json({ contact })
 }
 
-const createContact = async (req, res) => {
-    const newContact = await ContactCollection.create(req.body)
+const createContactCtrl = async (req, res) => {
+    const newContact = await createContact(req.body)
 
     if (!newContact) {
         throw httpError(400)
@@ -28,9 +34,9 @@ const createContact = async (req, res) => {
     res.status(201).json(newContact)
 }
 
-const deleteContact = async (req, res) => {
+const deleteContactCtrl = async (req, res) => {
     const { contactId } = req.params
-    const removedContact = await ContactCollection.findByIdAndDelete(contactId)
+    const removedContact = await deleteContact(contactId)
     if (!removedContact) {
         throw httpError(404)
     }
@@ -38,17 +44,13 @@ const deleteContact = async (req, res) => {
     res.status(200).json({ message: 'Succesfully removed' })
 }
 
-const updateContact = async (req, res) => {
+const updateContactCtrl = async (req, res) => {
     const { contactId } = req.params
     const payload = req.body
-    const rawUpdatedContact = await ContactCollection.findByIdAndUpdate(
-        contactId,
-        payload,
-        {
-            returnDocument: 'after',
-            includeResultMetadata: true,
-        },
-    )
+    const rawUpdatedContact = await updateContact(contactId, payload, {
+        returnDocument: 'after',
+        includeResultMetadata: true,
+    })
     if (!rawUpdatedContact || !rawUpdatedContact.value) {
         throw httpError(404)
     }
@@ -57,9 +59,9 @@ const updateContact = async (req, res) => {
 }
 
 export const ctrl = {
-    getAllContacts: ctrlWrapper(getAllContacts),
-    createContact: ctrlWrapper(createContact),
-    getContactById: ctrlWrapper(getContactById),
-    deleteContact: ctrlWrapper(deleteContact),
-    updateContact: ctrlWrapper(updateContact),
+    getAllContactsCtrl: ctrlWrapper(getAllContactsCtrl),
+    createContactCtrl: ctrlWrapper(createContactCtrl),
+    getContactByIdCtrl: ctrlWrapper(getContactByIdCtrl),
+    deleteContactCtrl: ctrlWrapper(deleteContactCtrl),
+    updateContactCtrl: ctrlWrapper(updateContactCtrl),
 }

@@ -4,12 +4,12 @@ import { isValidId } from '../middlewares/isValidId.js'
 
 const contactRouter = Router()
 
-contactRouter.get('/', ctrl.getAllContacts)
-contactRouter.get('/:contactId', isValidId, ctrl.getContactById)
+contactRouter.get('/', ctrl.getAllContactsCtrl)
+contactRouter.get('/:contactId', isValidId, ctrl.getContactByIdCtrl)
 
-contactRouter.post('/', ctrl.createContact)
-contactRouter.delete('/:contactId', isValidId, ctrl.deleteContact)
-contactRouter.put('/:contactId', isValidId, ctrl.updateContact)
-contactRouter.patch('/:contactId', isValidId, ctrl.updateContact)
+contactRouter.post('/', ctrl.createContactCtrl)
+contactRouter.delete('/:contactId', isValidId, ctrl.deleteContactCtrl)
+contactRouter.put('/:contactId', isValidId, ctrl.updateContactCtrl)
+contactRouter.patch('/:contactId', isValidId, ctrl.updateContactCtrl)
 
 export { contactRouter }
