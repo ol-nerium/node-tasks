@@ -9,7 +9,7 @@ contactRouter.get('/:contactId', isValidId, ctrl.getContactByIdCtrl)
 
 contactRouter.post('/', ctrl.createContactCtrl)
 contactRouter.delete('/:contactId', isValidId, ctrl.deleteContactCtrl)
-contactRouter.put('/:contactId', isValidId, ctrl.updateContactCtrl)
-contactRouter.patch('/:contactId', isValidId, ctrl.updateContactCtrl)
+contactRouter.put('/:contactId', isValidId, ctrl.upsertContactCtrl)
+contactRouter.patch('/:contactId', isValidId, ctrl.patchContactCtrl)
 
 export { contactRouter }

@@ -21,13 +21,25 @@ const getContactById = async (contactId) => {
     return contact
 }
 
-const updateContact = async (contactId, payload, params) => {
-    const rawUpdatedContact = await ContactCollection.findByIdAndUpdate(
+const updateContact = async (contactId, payload, options = {}) => {
+    const rawResult = await ContactCollection.findByIdAndUpdate(
         contactId,
         payload,
-        params,
+        {
+            returnDocument: 'after',
+            includeResultMetadata: true,
+            ...options,
+        },
     )
-    return rawUpdatedContact
+
+    if (!rawResult || !rawResult.value) {
+        return null
+    }
+
+    return {
+        student: rawResult.value,
+        isNew: !rawResult?.lastErrorObject?.updatedExisting,
+    }
 }
 
 export {

@@ -44,18 +44,35 @@ const deleteContactCtrl = async (req, res) => {
     res.status(200).json({ message: 'Succesfully removed' })
 }
 
-const updateContactCtrl = async (req, res) => {
+const upsertContactCtrl = async (req, res, next) => {
     const { contactId } = req.params
     const payload = req.body
-    const rawUpdatedContact = await updateContact(contactId, payload, {
-        returnDocument: 'after',
-        includeResultMetadata: true,
+    const updatedContactObj = await updateContact(contactId, payload, {
+        upsert: true,
     })
-    if (!rawUpdatedContact || !rawUpdatedContact.value) {
-        throw httpError(404)
+
+    // if (!updatedContactObj) {
+    //     next(httpError(404, 'Contact not found'))
+    //     return
+    // }
+
+    const status = updatedContactObj.isNew ? 201 : 200
+
+    res.status(status).json(updatedContactObj.student)
+}
+
+const patchContactCtrl = async (req, res, next) => {
+    const { contactId } = req.params
+    const payload = req.body
+
+    const updatedContactObj = await updateContact(contactId, payload)
+
+    if (!updatedContactObj) {
+        next(httpError(404, 'Contact not found'))
+        return
     }
 
-    res.status(200).json(rawUpdatedContact.value)
+    res.status(200).json(updatedContactObj.student)
 }
 
 export const ctrl = {
@@ -63,5 +80,6 @@ export const ctrl = {
     createContactCtrl: ctrlWrapper(createContactCtrl),
     getContactByIdCtrl: ctrlWrapper(getContactByIdCtrl),
     deleteContactCtrl: ctrlWrapper(deleteContactCtrl),
-    updateContactCtrl: ctrlWrapper(updateContactCtrl),
+    upsertContactCtrl: ctrlWrapper(upsertContactCtrl),
+    patchContactCtrl: ctrlWrapper(patchContactCtrl),
 }
