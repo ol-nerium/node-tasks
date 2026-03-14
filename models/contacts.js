@@ -1,13 +1,4 @@
-import { model, Schema } from 'mongoose'
-import Joi from 'joi'
-
-const schema = Joi.object({
-    name: Joi.string().required(),
-    phoneNumber: Joi.string().required(),
-    email: Joi.string(),
-    isFavourite: Joi.boolean(),
-    contactType: Joi.string().valid('work', 'home', 'personal'),
-})
+import { model, Schema } from 'mongoose';
 
 const contactsShema = new Schema(
     {
@@ -39,7 +30,8 @@ const contactsShema = new Schema(
         timestamps: true,
         versionKey: false,
     },
-)
+);
 
-export { contactsShema }
-export const ContactCollection = model('contact', contactsShema)
+export { contactsShema };
+
+export const ContactCollection = model('contact', contactsShema);
