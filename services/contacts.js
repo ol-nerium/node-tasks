@@ -14,22 +14,6 @@ const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter }) => {
         contactsQuery.where('contactType').equals(filter.type);
     }
 
-    // if (filter.gender) {
-    //     contactsQuery.where('gender').equals(filter.gender);
-    // }
-    // if (filter.maxAge) {
-    //     contactsQuery.where('maxAge').lte(filter.maxAge);
-    // }
-    // if (filter.minAge) {
-    //     contactsQuery.where('minAge').gte(filter.minAge);
-    // }
-    // if (filter.maxAvgMark) {
-    //     contactsQuery.where('maxAvgMark').lte(filter.maxAvgMark);
-    // }
-    // if (filter.minAvgMark) {
-    //     contactsQuery.where('minAvgMark').gte(filter.minAvgMark);
-    // }
-
     const [contactsCount, contacts] = await Promise.all([
         ContactCollection.find().merge(contactsQuery).countDocuments(),
 
