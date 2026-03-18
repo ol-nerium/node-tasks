@@ -6,8 +6,10 @@ import {
     createContactSchema,
     updateContactSchema,
 } from '../validation/contacts.js';
+import { authenticate } from '../middlewares/authenticate.js';
 
 const contactsRouter = Router();
+contactsRouter.use(authenticate);
 
 contactsRouter.get('/', ctrl.getAllContactsCtrl);
 contactsRouter.get('/:contactId', isValidId, ctrl.getContactByIdCtrl);
@@ -21,7 +23,7 @@ contactsRouter.delete('/:contactId', isValidId, ctrl.deleteContactCtrl);
 contactsRouter.put(
     '/:contactId',
     isValidId,
-    validateBody(updateContactSchema),
+    validateBody(createContactSchema),
     ctrl.upsertContactCtrl,
 );
 contactsRouter.patch(

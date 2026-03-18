@@ -1,11 +1,18 @@
 import { ContactCollection } from '../models/contacts.js';
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 
-const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter }) => {
+const getAllContacts = async ({
+    page,
+    perPage,
+    sortOrder,
+    sortBy,
+    filter,
+    userId,
+}) => {
     const limit = perPage;
     const skip = (page - 1) * perPage;
 
-    const contactsQuery = ContactCollection.find();
+    const contactsQuery = ContactCollection.find({ userId });
 
     if (filter.isFavourite) {
         contactsQuery.where('isFavourite').equals(filter.isFavourite);
@@ -32,25 +39,27 @@ const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter }) => {
     return { data: contacts, ...paginationData };
 };
 
-const getContactById = async (contactId) => {
-    const contact = await ContactCollection.findById(contactId);
-    return { data: contact };
+const getContactById = async ({ contactId, userId }) => {
+    const contact = await ContactCollection.findOne({ _id: contactId, userId });
+    return contact;
 };
 
 const createContact = async (payload) => {
     const newContact = await ContactCollection.create(payload);
-    return { data: newContact };
+    return newContact;
 };
 
-const deleteContact = async (contactId) => {
-    const removedContact = await ContactCollection.findByIdAndDelete(contactId);
-
-    return { data: removedContact };
+const deleteContact = async ({ contactId, userId }) => {
+    const removedContact = await ContactCollection.findOneAndDelete({
+        _id: contactId,
+        userId,
+    });
+    return removedContact;
 };
 
-const updateContact = async (contactId, payload, options = {}) => {
-    const rawResult = await ContactCollection.findByIdAndUpdate(
-        contactId,
+const updateContact = async (contactId, userId, payload, options = {}) => {
+    const rawResult = await ContactCollection.findOneAndUpdate(
+        { _id: contactId, userId },
         payload,
         {
             returnDocument: 'after',
@@ -64,7 +73,7 @@ const updateContact = async (contactId, payload, options = {}) => {
     }
 
     return {
-        data: rawResult.value,
+        contact: rawResult.value,
         isNew: !rawResult?.lastErrorObject?.updatedExisting,
     };
 };

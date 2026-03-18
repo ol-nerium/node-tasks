@@ -15,15 +15,17 @@ const getAllContactsCtrl = async (req, res) => {
     const { page, perPage } = parsePaginationParams(req.query);
     const { sortOrder, sortBy } = parseSortParams(req.query);
     const filter = parseFilterParams(req.query);
-    // { gender, maxAge, minAge, maxAvgMark, minAvgMark }
+    const userId = req.user._id;
+
     const contacts = await getAllContacts({
         page,
         perPage,
         sortOrder,
         sortBy,
         filter,
+        userId,
     });
-    res.status(200).json({
+    res.json({
         status: 200,
         message: 'Successfully found contacts!',
         ...contacts,
@@ -32,64 +34,85 @@ const getAllContactsCtrl = async (req, res) => {
 
 const getContactByIdCtrl = async (req, res) => {
     const { contactId } = req.params;
-    const contact = await getContactById(contactId);
+    const userId = req.user._id;
+
+    const contact = await getContactById({ contactId, userId });
 
     if (!contact) {
         throw httpError(404, 'Not found');
     }
 
-    res.status(200).json({ contact });
+    res.json({ status: 200, data: contact });
 };
 
 const createContactCtrl = async (req, res) => {
-    const newContact = await createContact(req.body);
+    const userId = req.user._id;
 
-    if (!newContact) {
-        throw httpError(400);
-    }
+    const newContact = await createContact({
+        ...req.body,
+        userId,
+    });
 
-    res.status(201).json(newContact);
+    // if (!newContact) {
+    //     throw httpError(400);
+    // }
+
+    res.json({ status: 201, data: newContact });
 };
 
-const deleteContactCtrl = async (req, res) => {
+const deleteContactCtrl = async (req, res, next) => {
     const { contactId } = req.params;
-    const removedContact = await deleteContact(contactId);
+    const userId = req.user._id;
+
+    const removedContact = await deleteContact({ contactId, userId });
     if (!removedContact) {
-        throw httpError(404);
+        next(httpError(404, 'Contact not found'));
+        return;
     }
 
-    res.status(200).json({ message: 'Succesfully removed' });
+    res.json({ status: 200, message: 'Succesfully removed' });
 };
 
 const upsertContactCtrl = async (req, res, next) => {
     const { contactId } = req.params;
+    const userId = req.user._id;
+
     const payload = req.body;
-    const updatedContactObj = await updateContact(contactId, payload, {
+    const result = await updateContact(contactId, userId, payload, {
         upsert: true,
     });
 
-    // if (!updatedContactObj) {
-    //     next(httpError(404, 'Contact not found'))
-    //     return
-    // }
+    if (!result) {
+        next(httpError(404, 'Contact not found'));
+        return;
+    }
 
-    const status = updatedContactObj.isNew ? 201 : 200;
+    const status = result.isNew ? 201 : 200;
 
-    res.status(status).json(updatedContactObj.student);
+    res.json({
+        status,
+        message: 'Successfully upserted a contact',
+        data: result.contact,
+    });
 };
 
 const patchContactCtrl = async (req, res, next) => {
     const { contactId } = req.params;
     const payload = req.body;
+    const userId = req.user._id;
 
-    const updatedContactObj = await updateContact(contactId, payload);
+    const result = await updateContact(contactId, userId, payload);
 
-    if (!updatedContactObj) {
+    if (!result) {
         next(httpError(404, 'Contact not found'));
         return;
     }
 
-    res.status(200).json(updatedContactObj.student);
+    res.json({
+        status: 200,
+        message: 'Successfully upserted a contact',
+        data: result.contact,
+    });
 };
 
 export const ctrl = {

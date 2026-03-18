@@ -1,4 +1,5 @@
 import Joi from 'joi';
+import { isValidObjectId } from 'mongoose';
 
 const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
@@ -8,6 +9,12 @@ const createContactSchema = Joi.object({
     email: Joi.string(),
     isFavourite: Joi.boolean(),
     contactType: Joi.string().valid('work', 'home', 'personal'),
+    userId: Joi.string().custom((value, helpers) => {
+        if (value && !isValidObjectId(value)) {
+            return helpers.message('User id should be a valid mongo id');
+        }
+        return true;
+    }),
 });
 
 const updateContactSchema = Joi.object({
