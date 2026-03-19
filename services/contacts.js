@@ -12,7 +12,7 @@ const getAllContacts = async ({
     const limit = perPage;
     const skip = (page - 1) * perPage;
 
-    const contactsQuery = ContactCollection.find({ userId });
+    const contactsQuery = ContactCollection.find({ user: userId });
 
     if (filter.isFavourite) {
         contactsQuery.where('isFavourite').equals(filter.isFavourite);
@@ -28,6 +28,7 @@ const getAllContacts = async ({
             .skip(skip)
             .limit(limit)
             .sort({ [sortBy]: sortOrder })
+            .populate('user', 'name')
             .exec(),
     ]);
 
@@ -40,26 +41,30 @@ const getAllContacts = async ({
 };
 
 const getContactById = async ({ contactId, userId }) => {
-    const contact = await ContactCollection.findOne({ _id: contactId, userId });
+    const contact = await ContactCollection.findOne({
+        _id: contactId,
+        user: userId,
+    }).populate('user', 'name');
     return contact;
 };
 
 const createContact = async (payload) => {
-    const newContact = await ContactCollection.create(payload);
+    let newContact = await ContactCollection.create(payload);
+    newContact = await newContact.populate('user', 'name');
     return newContact;
 };
 
 const deleteContact = async ({ contactId, userId }) => {
     const removedContact = await ContactCollection.findOneAndDelete({
         _id: contactId,
-        userId,
+        user: userId,
     });
     return removedContact;
 };
 
 const updateContact = async (contactId, userId, payload, options = {}) => {
     const rawResult = await ContactCollection.findOneAndUpdate(
-        { _id: contactId, userId },
+        { _id: contactId, user: userId },
         payload,
         {
             returnDocument: 'after',
@@ -73,7 +78,7 @@ const updateContact = async (contactId, userId, payload, options = {}) => {
     }
 
     return {
-        contact: rawResult.value,
+        contact: await rawResult.value.populate('user', 'name'),
         isNew: !rawResult?.lastErrorObject?.updatedExisting,
     };
 };

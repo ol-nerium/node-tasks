@@ -50,7 +50,7 @@ const createContactCtrl = async (req, res) => {
 
     const newContact = await createContact({
         ...req.body,
-        userId,
+        user: userId,
     });
 
     // if (!newContact) {

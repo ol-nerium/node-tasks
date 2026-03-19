@@ -25,9 +25,9 @@ const contactsShema = new Schema(
             required: true,
             default: 'personal',
         },
-        userId: {
+        user: {
             type: Schema.Types.ObjectId,
-            ref: 'contacts',
+            ref: 'user',
         },
     },
     {
