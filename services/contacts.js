@@ -28,7 +28,7 @@ const getAllContacts = async ({
             .skip(skip)
             .limit(limit)
             .sort({ [sortBy]: sortOrder })
-            .populate('user', 'name')
+            .populate('user', 'name email')
             .exec(),
     ]);
 
@@ -44,13 +44,13 @@ const getContactById = async ({ contactId, userId }) => {
     const contact = await ContactCollection.findOne({
         _id: contactId,
         user: userId,
-    }).populate('user', 'name');
+    }).populate('user', 'name email');
     return contact;
 };
 
 const createContact = async (payload) => {
     let newContact = await ContactCollection.create(payload);
-    newContact = await newContact.populate('user', 'name');
+    newContact = await newContact.populate('user', 'name email');
     return newContact;
 };
 
@@ -78,7 +78,7 @@ const updateContact = async (contactId, userId, payload, options = {}) => {
     }
 
     return {
-        contact: await rawResult.value.populate('user', 'name'),
+        contact: await rawResult.value.populate('user', 'name email'),
         isNew: !rawResult?.lastErrorObject?.updatedExisting,
     };
 };
