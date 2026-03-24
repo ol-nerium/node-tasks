@@ -47,7 +47,8 @@ export const loginUser = async (payload) => {
     const user = await UserCollection.findOne({ email: payload.email });
     if (!user) throw httpError(404, 'Wrong email or password');
 
-    const isEqual = bcrypt.compare(payload.password, user.password);
+    const isEqual = await bcrypt.compare(payload.password, user.password);
+    console.log(isEqual);
     if (!isEqual) {
         throw httpError(401);
     }
@@ -114,7 +115,7 @@ export const requestResetToken = async (email) => {
             email,
         },
         getEnvVariable('JWT_SECRET'),
-        { expiresIn: FIFTEEN_MINUTES },
+        { expiresIn: '15m' },
     );
 
     const resetPasswordTemplatePath = path.join(
