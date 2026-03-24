@@ -48,7 +48,7 @@ export const loginUser = async (payload) => {
     if (!user) throw httpError(404, 'Wrong email or password');
 
     const isEqual = await bcrypt.compare(payload.password, user.password);
-    console.log(isEqual);
+
     if (!isEqual) {
         throw httpError(401);
     }

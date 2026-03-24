@@ -6,10 +6,13 @@ import {
     updateContact,
 } from '../services/contacts.js';
 import { ctrlWrapper } from '../utils/ctrlWraper.js';
+import { getEnvVariable } from '../utils/getEnvVariable.js';
 import { httpError } from '../utils/httpError.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
+import { saveFileToUploadDir } from '../utils/saveFileToUploadDir.js';
 
 const getAllContactsCtrl = async (req, res) => {
     const { page, perPage } = parsePaginationParams(req.query);
@@ -48,6 +51,8 @@ const getContactByIdCtrl = async (req, res) => {
 const createContactCtrl = async (req, res) => {
     const userId = req.user._id;
 
+    // const photo = req.file;
+
     const newContact = await createContact({
         ...req.body,
         user: userId,
@@ -77,6 +82,8 @@ const upsertContactCtrl = async (req, res, next) => {
     const { contactId } = req.params;
     const userId = req.user._id;
 
+    // const photo = req.file;
+
     const payload = req.body;
     const result = await updateContact(contactId, userId, payload, {
         upsert: true,
@@ -101,7 +108,19 @@ const patchContactCtrl = async (req, res, next) => {
     const payload = req.body;
     const userId = req.user._id;
 
-    const result = await updateContact(contactId, userId, payload);
+    const photo = req.file;
+
+    let photoUrl;
+    if (photo) {
+        if (getEnvVariable('ENABLE_CLOUDINARY') === true) {
+            photoUrl = await saveFileToCloudinary(photo);
+        } else photoUrl = await saveFileToUploadDir(photo);
+    }
+
+    const result = await updateContact(contactId, userId, {
+        ...payload,
+        photo: photoUrl,
+    });
 
     if (!result) {
         next(httpError(404, 'Contact not found'));

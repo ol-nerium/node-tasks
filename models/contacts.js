@@ -2,6 +2,7 @@ import { model, Schema } from 'mongoose';
 
 const contactsShema = new Schema(
     {
+        photo: { type: String },
         name: {
             type: String,
             required: true,
