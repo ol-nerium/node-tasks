@@ -22,6 +22,7 @@ const setupSession = (res, session) => {
         httpOnly: true,
         expires: new Date(Date.now() + MONTH),
     });
+    console.log(session.id);
 };
 
 const registerUserCtrl = async (req, res) => {

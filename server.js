@@ -18,11 +18,11 @@ const setupServer = () => {
     app.use(cors());
     app.use(cookieParser());
 
-    app.use(
-        pino({
-            transport: { target: 'pino-pretty' },
-        }),
-    );
+    // app.use(
+    //     pino({
+    //         transport: { target: 'pino-pretty' },
+    //     }),
+    // );
 
     app.use('/uploads', express.static(UPLOAD_DIR));
 
